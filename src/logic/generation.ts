@@ -1,9 +1,9 @@
-import { GridCell, PuzzleGrid } from "../types/grid";
+import { GridCell, PopulatedCell, PuzzleGrid } from "../types/grid";
 import { BLANK_GRID, FILL_LIMIT, VALUES } from "./constants";
-import { cloneGrid, shuffle } from "./helpers";
+import { cloneGrid, getRandomCell, shuffle } from "./helpers";
 import { isValid } from "./validity";
 
-export const getNewGrid = () => cloneGrid(BLANK_GRID);
+export const getBlankGrid = () => cloneGrid(BLANK_GRID);
 
 export const getNextEmptyCell = (puzzleGrid: PuzzleGrid) => {
   const emptyCell: GridCell = { rowIndex: -1, columnIndex: -1 };
@@ -19,7 +19,6 @@ export const getNextEmptyCell = (puzzleGrid: PuzzleGrid) => {
 };
 
 let counter = 0;
-
 export const fillGrid = (puzzleGrid: PuzzleGrid): PuzzleGrid | undefined => {
   const emptyCell = getNextEmptyCell(puzzleGrid);
   const { rowIndex, columnIndex } = emptyCell;
@@ -32,7 +31,6 @@ export const fillGrid = (puzzleGrid: PuzzleGrid): PuzzleGrid | undefined => {
 
   for (const value of shuffle(VALUES)) {
     counter++;
-    console.log(`iteration ${counter} | placing ${value}`);
 
     if (counter > FILL_LIMIT) {
       throw new Error("Timeout while filling grid.");
@@ -51,4 +49,50 @@ export const fillGrid = (puzzleGrid: PuzzleGrid): PuzzleGrid | undefined => {
   }
 
   return undefined;
+};
+
+export const makeGridPlayable = (
+  puzzleGrid: PuzzleGrid,
+  numEmptyCells: number
+) => {
+  const removedCells: PopulatedCell[] = [];
+  const playableGrid = cloneGrid(puzzleGrid);
+
+  while (removedCells.length < numEmptyCells) {
+    const { rowIndex, columnIndex } = getRandomCell();
+
+    if (playableGrid[rowIndex][columnIndex] !== 0) {
+      const value = playableGrid[rowIndex][columnIndex];
+      removedCells.push({ rowIndex, columnIndex, value });
+
+      playableGrid[rowIndex][columnIndex] = 0;
+
+      if (!fillGrid(playableGrid)) {
+        removedCells.pop();
+        playableGrid[rowIndex][columnIndex] = value;
+      }
+    }
+  }
+
+  return { playableGrid, removedCells };
+};
+
+export const createNewGrid = (): {
+  playableGrid: PuzzleGrid;
+  removedCells: PopulatedCell[];
+  filledGrid: PuzzleGrid;
+} => {
+  counter = 0;
+
+  try {
+    const filledGrid = fillGrid(getBlankGrid());
+
+    if (filledGrid) {
+      return { ...makeGridPlayable(filledGrid, 50), filledGrid };
+    } else {
+      throw new Error("Failed to make filled grid.");
+    }
+  } catch (_e) {
+    return createNewGrid();
+  }
 };

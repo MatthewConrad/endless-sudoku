@@ -1,4 +1,5 @@
 import { GridCell, PuzzleGrid } from "../types/grid";
+import { VALUES } from "./constants";
 
 interface ValidityArgs {
   puzzleGrid: PuzzleGrid;
@@ -46,12 +47,18 @@ export const isValidBox = ({
 };
 
 export const isValid = (args: ValidityArgs) => {
-  const row = isValidRow(args);
-  const column = isValidColumn(args);
-  const box = isValidBox(args);
-
-  console.log(
-    `passed row? ${row} | passed column: ${column} | passed box: ${box}`
-  );
   return isValidRow(args) && isValidColumn(args) && isValidBox(args);
+};
+
+export const getValidCellValues = (
+  puzzleGrid: PuzzleGrid,
+  emptyCell: GridCell
+) => {
+  return VALUES.reduce<number[]>((valid, value) => {
+    if (isValid({ puzzleGrid, emptyCell, value })) {
+      return [...valid, value];
+    }
+
+    return valid;
+  }, []);
 };
