@@ -5,6 +5,44 @@
   text-align: center;
 }
 
+.grid {
+  display: flex;
+  flex-direction: column;
+
+  font-size: 2rem;
+  font-weight: 600;
+
+  outline: 0.25rem solid white;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+
+  box-sizing: border-box;
+  &:nth-of-type(3),
+  &:nth-of-type(6) {
+    border-bottom: 2px solid darkgrey;
+  }
+}
+
+.cell {
+  width: 5rem;
+  height: 5rem;
+
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border: 1px solid grey;
+
+  &:nth-of-type(3),
+  &:nth-of-type(6) {
+    border-right: 2px solid darkgrey;
+  }
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
