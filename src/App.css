@@ -41,6 +41,14 @@
   &:nth-of-type(6) {
     border-right: 2px solid darkgrey;
   }
+
+  &.active {
+    background-color: rgba(50, 50, 50, 0.3);
+  }
+
+  &.secondary {
+    background-color: rgba(50, 50, 50, 0.1);
+  }
 }
 
 .logo {
