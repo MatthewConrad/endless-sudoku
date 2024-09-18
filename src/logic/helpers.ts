@@ -1,4 +1,10 @@
 import { GridCell, PuzzleGrid } from "../types/grid";
+import { MAX_INDEX } from "./constants";
+
+export const addCells = (a: GridCell, b: GridCell): GridCell => ({
+  rowIndex: Math.min(Math.max(0, a.rowIndex + b.rowIndex), MAX_INDEX),
+  columnIndex: Math.min(Math.max(0, a.columnIndex + b.columnIndex), MAX_INDEX),
+});
 
 export const shuffle = <T>(array: T[]): T[] => {
   const shuffled = [...array];

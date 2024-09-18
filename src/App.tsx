@@ -18,19 +18,11 @@ function App() {
           <div key={`row-${rowIndex}`} className="row">
             {row.map((val, colIndex) => {
               const isCurrentRow = cursor.rowIndex === rowIndex;
-              const isRowActive = isCurrentRow && cursor.isHorizontal;
-
               const isCurrentColumn = cursor.columnIndex === colIndex;
-              const isColumnActive = isCurrentColumn && !cursor.isHorizontal;
 
               const isCellActive = isCurrentRow && isCurrentColumn;
-              const isCellSecondary = isRowActive || isColumnActive;
 
-              const classModifier = isCellActive
-                ? "active"
-                : isCellSecondary
-                ? "secondary"
-                : "";
+              const classModifier = isCellActive ? "active" : "";
 
               return (
                 <div
