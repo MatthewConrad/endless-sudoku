@@ -8,36 +8,43 @@ function App() {
   const { playableGrid } = createNewGrid();
   const grid = useRef<PuzzleGrid>(playableGrid);
 
-  const { cursor, onCellClick, onKeyDown } = useCursor();
+  const { cursor, onCellClick, onKeyDown, onKeyUp } = useCursor();
 
-  console.log(cursor);
   return (
-    <div className="grid" tabIndex={0} onKeyDown={onKeyDown}>
-      {grid.current.map((row, rowIndex) => {
-        return (
-          <div key={`row-${rowIndex}`} className="row">
-            {row.map((val, colIndex) => {
-              const isCurrentRow = cursor.rowIndex === rowIndex;
-              const isCurrentColumn = cursor.columnIndex === colIndex;
+    <>
+      <div>Candidate mode: {`${cursor.isCandidateMode}`}</div>
+      <div
+        className="grid"
+        tabIndex={0}
+        onKeyDown={onKeyDown}
+        onKeyUp={onKeyUp}
+      >
+        {grid.current.map((row, rowIndex) => {
+          return (
+            <div key={`row-${rowIndex}`} className="row">
+              {row.map((val, colIndex) => {
+                const isCurrentRow = cursor.rowIndex === rowIndex;
+                const isCurrentColumn = cursor.columnIndex === colIndex;
 
-              const isCellActive = isCurrentRow && isCurrentColumn;
+                const isCellActive = isCurrentRow && isCurrentColumn;
 
-              const classModifier = isCellActive ? "active" : "";
+                const classModifier = isCellActive ? "active" : "";
 
-              return (
-                <div
-                  key={`${rowIndex},${colIndex}`}
-                  className={`cell ${classModifier}`.trim()}
-                  onClick={() => onCellClick(rowIndex, colIndex)}
-                >
-                  {val || ""}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
-    </div>
+                return (
+                  <div
+                    key={`${rowIndex},${colIndex}`}
+                    className={`cell ${classModifier}`.trim()}
+                    onClick={() => onCellClick(rowIndex, colIndex)}
+                  >
+                    {val || ""}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 

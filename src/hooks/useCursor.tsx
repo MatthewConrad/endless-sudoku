@@ -32,6 +32,16 @@ export const useCursor = () => {
           };
         });
         break;
+      case " ":
+      case "Spacebar":
+      case "Shift":
+        e.preventDefault();
+        e.stopPropagation();
+        setCursor((prev) => ({
+          ...prev,
+          isCandidateMode: !prev.isCandidateMode,
+        }));
+        break;
       case "Tab":
         e.preventDefault();
         e.stopPropagation();
@@ -41,5 +51,20 @@ export const useCursor = () => {
     }
   };
 
-  return { cursor, onCellClick, onKeyDown };
+  const onKeyUp: KeyboardEventHandler<HTMLElement> = (e) => {
+    switch (e.key) {
+      case "Shift":
+        e.preventDefault();
+        e.stopPropagation();
+        setCursor((prev) => ({
+          ...prev,
+          isCandidateMode: !prev.isCandidateMode,
+        }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  return { cursor, onCellClick, onKeyDown, onKeyUp };
 };
