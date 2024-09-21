@@ -3,6 +3,7 @@ import "./App.css";
 import { createNewGrid } from "./logic/generation";
 import { PuzzleGrid } from "./types/grid";
 import { useCursor } from "./hooks/useCursor";
+import { Cell } from "./components/Cell";
 
 function App() {
   const { playableGrid } = createNewGrid();
@@ -28,16 +29,16 @@ function App() {
 
                 const isCellActive = isCurrentRow && isCurrentColumn;
 
-                const classModifier = isCellActive ? "active" : "";
-
                 return (
-                  <div
+                  <Cell
                     key={`${rowIndex},${colIndex}`}
-                    className={`cell ${classModifier}`.trim()}
+                    grid={grid.current}
                     onClick={() => onCellClick(rowIndex, colIndex)}
-                  >
-                    {val || ""}
-                  </div>
+                    value={val}
+                    rowIndex={rowIndex}
+                    columnIndex={colIndex}
+                    isCellActive={isCellActive}
+                  />
                 );
               })}
             </div>
