@@ -18,22 +18,43 @@ export const Cell = ({
 }: CellProps) => {
   const classModifier = isCellActive ? "active" : "";
 
-  const candidates = getValidCellValues(grid, { rowIndex, columnIndex });
+  const autoCandidates = getValidCellValues(grid, { rowIndex, columnIndex });
+
+  const handleCellClick = () => {
+    if (!isCellActive) {
+      onClick(rowIndex, columnIndex);
+    }
+  };
+
+  const handleCandidateClick = () => {
+    if (isCellActive) {
+      console.log("clicked candidate, do something");
+    }
+  };
 
   return (
     <div
       key={`${rowIndex},${columnIndex}`}
       className={`cell ${classModifier}`.trim()}
-      onClick={() => onClick(rowIndex, columnIndex)}
+      onClick={handleCellClick}
     >
       {value ? (
         <div>{value}</div>
       ) : (
         <div className="candidates">
           {VALUES.map((v) => {
-            const isCandidate = candidates.includes(v);
+            const isCandidate = autoCandidates.includes(v);
 
-            return <div>{isCandidate ? v : ""}</div>;
+            return (
+              <div
+                className={`candidate-option ${
+                  isCandidate ? "placed" : ""
+                }`.trim()}
+                onClick={handleCandidateClick}
+              >
+                {v}
+              </div>
+            );
           })}
         </div>
       )}

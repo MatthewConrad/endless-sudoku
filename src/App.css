@@ -64,6 +64,18 @@
   font-size: 0.75rem;
 }
 
+.candidate-option {
+  opacity: 0;
+
+  &:hover {
+    opacity: 0.5;
+  }
+  
+  &.placed {
+    opacity: 1;
+  }
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

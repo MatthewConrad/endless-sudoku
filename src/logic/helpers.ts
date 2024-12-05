@@ -1,5 +1,17 @@
-import { GridCell, PuzzleGrid } from "../types/grid";
-import { MAX_INDEX } from "./constants";
+import {
+  CellValue,
+  GridCell,
+  GridCellState,
+  GridState,
+  PuzzleGrid,
+  RowState,
+} from "../types/grid";
+import { DEFAULT_CANDIDATES, MAX_INDEX } from "./constants";
+import { getValidCellValues, isValid } from "./validity";
+
+/**
+ * GRID GENERATION
+ */
 
 export const addCells = (a: GridCell, b: GridCell): GridCell => ({
   rowIndex: Math.min(Math.max(0, a.rowIndex + b.rowIndex), MAX_INDEX),
@@ -30,4 +42,159 @@ export const getRandomCell = (): GridCell => ({
 
 export const cloneGrid = (puzzleGrid: PuzzleGrid): PuzzleGrid => {
   return puzzleGrid.map((row) => [...row]);
+};
+
+/**
+ * GRID AND CELL STATE
+ */
+
+export const getCellCandidates = (
+  puzzleGrid: PuzzleGrid,
+  emptyCell: GridCell
+) => {
+  const validValues = getValidCellValues(puzzleGrid, emptyCell);
+
+  return validValues.reduce(
+    (candidates, val) => ({
+      ...candidates,
+      [val]: true,
+    }),
+    DEFAULT_CANDIDATES
+  );
+};
+
+export const getInitialGridState = (
+  puzzleGrid: PuzzleGrid,
+  solvedGrid: PuzzleGrid
+): GridState => {
+  return puzzleGrid.reduce<GridState>((gridState, row, rowIndex) => {
+    const rowState = row.reduce<RowState>((rs, initialValue, columnIndex) => {
+      const cellState: GridCellState = {
+        rowIndex,
+        columnIndex,
+        value: solvedGrid[rowIndex][columnIndex],
+        userValue: initialValue,
+        candidates: getCellCandidates(puzzleGrid, { rowIndex, columnIndex }),
+        userCandidates: { ...DEFAULT_CANDIDATES },
+        isPrefilled: initialValue !== 0,
+        isConfirmed: false,
+        isInvalid: false,
+        isIncorrect: false,
+      };
+      return {
+        ...rs,
+        [columnIndex]: cellState,
+      };
+    }, {});
+
+    return {
+      ...gridState,
+      [rowIndex]: rowState,
+    };
+  }, {});
+};
+
+export const getPuzzleGridFromState = (gridState: GridState): PuzzleGrid => {
+  return Object.values(gridState).map((rowState) =>
+    Object.values(rowState).map((cellState) => cellState.userValue)
+  );
+};
+
+export const getCellState = (
+  gridState: GridState,
+  { rowIndex, columnIndex }: GridCell
+): GridCellState => {
+  const rowState = gridState[rowIndex];
+  return rowState[columnIndex];
+};
+
+export const getGridStateWithUpdatedCell = (
+  gridState: GridState,
+  { rowIndex, columnIndex }: GridCell,
+  updatedCellState: GridCellState
+): GridState => ({
+  ...gridState,
+  [rowIndex]: {
+    ...gridState[rowIndex],
+    [columnIndex]: { ...updatedCellState },
+  },
+});
+
+export const toggleCellStateCandidate = (
+  candidateValue: CellValue,
+  { userCandidates, ...cellState }: GridCellState
+) => ({
+  ...cellState,
+  userCandidates: {
+    ...userCandidates,
+    [candidateValue]: !userCandidates[candidateValue],
+  },
+});
+
+export const clearCellStateCandidates = (
+  cellState: GridCellState
+): GridCellState => ({
+  ...cellState,
+  userCandidates: { ...DEFAULT_CANDIDATES },
+});
+
+export const setCellStateUserValue = (
+  newValue: CellValue,
+  cellState: GridCellState,
+  currentGrid: PuzzleGrid
+) => {
+  const { isConfirmed, isPrefilled, userValue, rowIndex, columnIndex } =
+    cellState;
+
+  if (isConfirmed || isPrefilled || userValue === newValue) {
+    return cellState;
+  }
+
+  return {
+    ...cellState,
+    userValue: newValue,
+    isInvalid: isValid({
+      puzzleGrid: currentGrid,
+      emptyCell: { rowIndex, columnIndex },
+      value: newValue,
+    }),
+  };
+};
+
+export const getCheckedCellState = (
+  cellState: GridCellState
+): GridCellState => {
+  const { value, userValue } = cellState;
+  const isConfirmed = value === userValue;
+
+  return { ...cellState, isConfirmed, isIncorrect: !isConfirmed };
+};
+
+export const getRevealedCellState = ({
+  value,
+  ...cellState
+}: GridCellState): GridCellState => ({
+  ...cellState,
+  value,
+  userValue: value,
+  isConfirmed: true,
+  isIncorrect: false,
+  isInvalid: false,
+});
+
+export const updateAllCells = (
+  gridState: GridState,
+  cellStateUpdateFn: (cellState: GridCellState) => GridCellState
+): GridState => {
+  return Object.fromEntries(
+    Object.entries(gridState).map(([rowIndex, rowState]) => {
+      const updatedRowState = Object.fromEntries(
+        Object.entries(rowState).map(([columnIndex, cellState]) => {
+          return [columnIndex, cellStateUpdateFn(cellState)];
+        })
+      );
+
+      return [rowIndex, updatedRowState];
+    })
+  );
 };

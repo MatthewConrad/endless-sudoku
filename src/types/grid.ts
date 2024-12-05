@@ -6,8 +6,25 @@ export interface GridCell {
   columnIndex: number;
 }
 
+export interface GridCursor extends GridCell {
+  isCandidateMode: boolean;
+}
+
 export interface PopulatedCell extends GridCell {
   value: number;
 }
 
 export type CellCandidates = Record<CellValue, boolean>;
+
+export interface GridCellState extends PopulatedCell {
+  userValue: number;
+  candidates: CellCandidates;
+  userCandidates: CellCandidates;
+  isPrefilled: boolean;
+  isConfirmed: boolean;
+  isInvalid: boolean;
+  isIncorrect: boolean;
+}
+
+export type RowState = Record<number, GridCellState>;
+export type GridState = Record<number, RowState>;

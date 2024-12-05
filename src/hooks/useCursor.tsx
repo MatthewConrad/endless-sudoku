@@ -1,11 +1,7 @@
 import { KeyboardEventHandler, useState } from "react";
-import { GridCell } from "../types/grid";
 import { ARROW_DIFFS } from "../logic/constants";
 import { addCells } from "../logic/helpers";
-
-interface GridCursor extends GridCell {
-  isCandidateMode?: boolean;
-}
+import { GridCursor } from "../types/grid";
 
 export const useCursor = () => {
   const [cursor, setCursor] = useState<GridCursor>({
