@@ -49,6 +49,18 @@
       background-color: rgba(50, 50, 50, 0.3);
     }
   }
+
+  &.invalid {
+    background-color: red;
+  }
+
+  &.incorrect {
+    color: red;
+  }
+
+  &.confirmed {
+    color: blue;
+  }
 }
 
 .candidates {
@@ -70,7 +82,7 @@
   &:hover {
     opacity: 0.5;
   }
-  
+
   &.placed {
     opacity: 1;
   }

@@ -155,7 +155,7 @@ export const setCellStateUserValue = (
     ...cellState,
     userValue: newValue,
     isInvalid: newValue
-      ? isValid({
+      ? !isValid({
           puzzleGrid: currentGrid,
           emptyCell: { rowIndex, columnIndex },
           value: newValue,
@@ -167,7 +167,12 @@ export const setCellStateUserValue = (
 export const getCheckedCellState = (
   cellState: GridCellState
 ): GridCellState => {
-  const { value, userValue } = cellState;
+  const { value, userValue, isPrefilled } = cellState;
+
+  if (isPrefilled || !userValue) {
+    return cellState;
+  }
+
   const isConfirmed = value === userValue;
 
   return { ...cellState, isConfirmed, isIncorrect: !isConfirmed };
@@ -175,12 +180,14 @@ export const getCheckedCellState = (
 
 export const getRevealedCellState = ({
   value,
+  isPrefilled,
   ...cellState
 }: GridCellState): GridCellState => ({
   ...cellState,
   value,
   userValue: value,
-  isConfirmed: true,
+  isPrefilled,
+  isConfirmed: !isPrefilled && true,
   isIncorrect: false,
   isInvalid: false,
 });

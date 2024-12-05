@@ -28,6 +28,9 @@ export const useCursor = ({
     isCandidateMode: false,
   });
 
+  const onToggleCandidateMode = () =>
+    setCursor((c) => ({ ...c, isCandidateMode: !c.isCandidateMode }));
+
   const onCellClick = (rowIndex: number, columnIndex: number) =>
     setCursor((prev) => ({ ...prev, rowIndex, columnIndex }));
 
@@ -101,5 +104,5 @@ export const useCursor = ({
     }
   };
 
-  return { cursor, onCellClick, onKeyDown, onKeyUp };
+  return { cursor, onToggleCandidateMode, onCellClick, onKeyDown, onKeyUp };
 };

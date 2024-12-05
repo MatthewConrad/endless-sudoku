@@ -11,18 +11,34 @@ function App() {
   const initialGrid = useRef<PuzzleGrid>(playableGrid);
   const solvedGrid = useRef<PuzzleGrid>(filledGrid);
 
-  const { gridState, toggleCellCandidate, setCellUserValue } = useGridState({
+  const {
+    gridState,
+    toggleCellCandidate,
+    setCellUserValue,
+    checkCell,
+    checkGrid,
+    revealCell,
+    revealGrid,
+    resetGrid,
+  } = useGridState({
     initialGrid: initialGrid.current,
     solvedGrid: solvedGrid.current,
   });
-  const { cursor, onCellClick, onKeyDown, onKeyUp } = useCursor({
-    onToggleCandidate: toggleCellCandidate,
-    onSetCellValue: setCellUserValue,
-  });
+  const { cursor, onToggleCandidateMode, onCellClick, onKeyDown, onKeyUp } =
+    useCursor({
+      onToggleCandidate: toggleCellCandidate,
+      onSetCellValue: setCellUserValue,
+    });
 
   return (
     <>
       <div>Candidate mode: {`${cursor.isCandidateMode}`}</div>
+      <button onClick={onToggleCandidateMode}>Toggle candidate mode</button>
+      <button onClick={() => checkCell(cursor)}>Check current cell</button>
+      <button onClick={() => revealCell(cursor)}>Reveal current cell</button>
+      <button onClick={checkGrid}>Check grid</button>
+      <button onClick={revealGrid}>Reveal grid</button>
+      <button onClick={resetGrid}>Reset grid</button>
       <div
         className="grid"
         tabIndex={0}

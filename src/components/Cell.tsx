@@ -14,12 +14,20 @@ export const Cell = ({
   userCandidates,
   rowIndex,
   columnIndex,
+  isConfirmed,
+  isIncorrect,
+  isInvalid,
   isCellActive,
   isAutoCandidate,
   onCellClick,
   onCandidateClick,
 }: CellProps) => {
-  const classModifier = isCellActive ? "active" : "";
+  const classModifiers = [
+    isCellActive && "active",
+    isConfirmed && "confirmed",
+    isIncorrect && "incorrect",
+    isInvalid && "invalid",
+  ].filter(Boolean) as string[];
 
   const candidatesToUse = isAutoCandidate ? candidates : userCandidates;
   const candidatesToDisplay = Object.entries(candidatesToUse).reduce<
@@ -47,7 +55,7 @@ export const Cell = ({
   return (
     <div
       key={`${rowIndex},${columnIndex}`}
-      className={`cell ${classModifier}`.trim()}
+      className={`cell ${classModifiers.join(" ")}`.trim()}
       onClick={handleCellClick}
     >
       {userValue ? (
