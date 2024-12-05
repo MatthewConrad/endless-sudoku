@@ -4,12 +4,21 @@ import { createNewGrid } from "./logic/generation";
 import { PuzzleGrid } from "./types/grid";
 import { useCursor } from "./hooks/useCursor";
 import { Cell } from "./components/Cell";
+import { useGridState } from "./hooks/useGridState";
 
 function App() {
-  const { playableGrid } = createNewGrid();
-  const grid = useRef<PuzzleGrid>(playableGrid);
+  const { playableGrid, filledGrid } = createNewGrid();
+  const initialGrid = useRef<PuzzleGrid>(playableGrid);
+  const solvedGrid = useRef<PuzzleGrid>(filledGrid);
 
-  const { cursor, onCellClick, onKeyDown, onKeyUp } = useCursor();
+  const { gridState, toggleCellCandidate, setCellUserValue } = useGridState({
+    initialGrid: initialGrid.current,
+    solvedGrid: solvedGrid.current,
+  });
+  const { cursor, onCellClick, onKeyDown, onKeyUp } = useCursor({
+    onToggleCandidate: toggleCellCandidate,
+    onSetCellValue: setCellUserValue,
+  });
 
   return (
     <>
@@ -20,23 +29,25 @@ function App() {
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
       >
-        {grid.current.map((row, rowIndex) => {
+        {Object.entries(gridState).map(([rowIndex, rowState]) => {
           return (
             <div key={`row-${rowIndex}`} className="row">
-              {row.map((val, colIndex) => {
-                const isCurrentRow = cursor.rowIndex === rowIndex;
-                const isCurrentColumn = cursor.columnIndex === colIndex;
+              {Object.entries(rowState).map(([colIndex, cellState]) => {
+                const isCurrentRow = cursor.rowIndex === +rowIndex;
+                const isCurrentColumn = cursor.columnIndex === +colIndex;
 
                 const isCellActive = isCurrentRow && isCurrentColumn;
 
                 return (
                   <Cell
                     key={`${rowIndex},${colIndex}`}
-                    grid={grid.current}
-                    onClick={() => onCellClick(rowIndex, colIndex)}
-                    value={val}
-                    rowIndex={rowIndex}
-                    columnIndex={colIndex}
+                    {...cellState}
+                    onCellClick={() => onCellClick(+rowIndex, +colIndex)}
+                    onCandidateClick={(candidateValue) =>
+                      toggleCellCandidate(candidateValue, cellState)
+                    }
+                    rowIndex={+rowIndex}
+                    columnIndex={+colIndex}
                     isCellActive={isCellActive}
                   />
                 );

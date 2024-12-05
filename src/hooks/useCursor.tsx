@@ -1,9 +1,27 @@
-import { KeyboardEventHandler, useState } from "react";
+import { KeyboardEventHandler, KeyboardEvent, useState } from "react";
 import { ARROW_DIFFS } from "../logic/constants";
 import { addCells } from "../logic/helpers";
-import { GridCursor } from "../types/grid";
+import { CellValue, GridCell, GridCursor } from "../types/grid";
 
-export const useCursor = () => {
+interface UseCursorArgs {
+  onToggleCandidate: (candidateValue: CellValue, cell: GridCell) => void;
+  onSetCellValue: (newValue: number, cell: GridCell) => void;
+}
+
+const getDigitFromNativeEvent = (e: KeyboardEvent<HTMLElement>) => {
+  const {
+    nativeEvent: { code },
+  } = e;
+
+  const [_, intDigit] = code.toLowerCase().split("digit");
+
+  return intDigit;
+};
+
+export const useCursor = ({
+  onToggleCandidate,
+  onSetCellValue,
+}: UseCursorArgs) => {
   const [cursor, setCursor] = useState<GridCursor>({
     rowIndex: 0,
     columnIndex: 0,
@@ -14,7 +32,12 @@ export const useCursor = () => {
     setCursor((prev) => ({ ...prev, rowIndex, columnIndex }));
 
   const onKeyDown: KeyboardEventHandler<HTMLElement> = (e) => {
-    switch (e.key) {
+    const rawKey = e.key;
+    const shiftedKey = getDigitFromNativeEvent(e);
+
+    const key = e.shiftKey && shiftedKey ? shiftedKey : rawKey;
+
+    switch (key) {
       case "ArrowUp":
       case "ArrowDown":
       case "ArrowLeft":
@@ -42,7 +65,23 @@ export const useCursor = () => {
         e.preventDefault();
         e.stopPropagation();
         break;
+      case "Backspace":
+        // TODO: verify behavior here
+        if (!cursor.isCandidateMode) {
+          onSetCellValue(0, cursor);
+        }
+        break;
       default:
+        const keyInt = Number.parseInt(key);
+        if (keyInt && !isNaN(keyInt)) {
+          const keyValue = keyInt as CellValue;
+
+          if (cursor.isCandidateMode) {
+            onToggleCandidate(keyValue, cursor);
+          } else {
+            onSetCellValue(keyValue, cursor);
+          }
+        }
         break;
     }
   };

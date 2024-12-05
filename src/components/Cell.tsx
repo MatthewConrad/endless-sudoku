@@ -1,34 +1,46 @@
 import { VALUES } from "../logic/constants";
-import { getValidCellValues } from "../logic/validity";
-import { PopulatedCell, PuzzleGrid } from "../types/grid";
+import { CellValue, GridCellState } from "../types/grid";
 
-interface CellProps extends PopulatedCell {
-  grid: PuzzleGrid;
-  onClick: (rowIndex: number, columnIndex: number) => void;
+interface CellProps extends GridCellState {
   isCellActive?: boolean;
+  isAutoCandidate?: boolean;
+  onCellClick: (rowIndex: number, columnIndex: number) => void;
+  onCandidateClick: (candidateValue: CellValue) => void;
 }
 
 export const Cell = ({
-  value,
+  userValue,
+  candidates,
+  userCandidates,
   rowIndex,
   columnIndex,
-  grid,
-  onClick,
   isCellActive,
+  isAutoCandidate,
+  onCellClick,
+  onCandidateClick,
 }: CellProps) => {
   const classModifier = isCellActive ? "active" : "";
 
-  const autoCandidates = getValidCellValues(grid, { rowIndex, columnIndex });
+  const candidatesToUse = isAutoCandidate ? candidates : userCandidates;
+  const candidatesToDisplay = Object.entries(candidatesToUse).reduce<
+    CellValue[]
+  >((placed, [candidate, isPlaced]) => {
+    if (isPlaced) {
+      return [...placed, +candidate as CellValue];
+    }
+
+    return placed;
+  }, []);
 
   const handleCellClick = () => {
     if (!isCellActive) {
-      onClick(rowIndex, columnIndex);
+      onCellClick(rowIndex, columnIndex);
     }
   };
 
-  const handleCandidateClick = () => {
+  const handleCandidateClick = (candidateValue: CellValue) => {
     if (isCellActive) {
-      console.log("clicked candidate, do something");
+      onCandidateClick(candidateValue);
     }
   };
 
@@ -38,19 +50,19 @@ export const Cell = ({
       className={`cell ${classModifier}`.trim()}
       onClick={handleCellClick}
     >
-      {value ? (
-        <div>{value}</div>
+      {userValue ? (
+        <div>{userValue}</div>
       ) : (
         <div className="candidates">
           {VALUES.map((v) => {
-            const isCandidate = autoCandidates.includes(v);
+            const isCandidate = candidatesToDisplay.includes(v);
 
             return (
               <div
                 className={`candidate-option ${
                   isCandidate ? "placed" : ""
                 }`.trim()}
-                onClick={handleCandidateClick}
+                onClick={() => handleCandidateClick(v)}
               >
                 {v}
               </div>

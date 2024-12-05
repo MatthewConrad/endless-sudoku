@@ -43,7 +43,7 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
       )
     );
 
-  const setCellUserValue = (newValue: CellValue, cell: GridCell) =>
+  const setCellUserValue = (newValue: number, cell: GridCell) =>
     setGridState((gs) =>
       getGridStateWithUpdatedCell(
         gs,
@@ -82,7 +82,6 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
   return {
     gridState,
     toggleCellCandidate,
-    toggleCellStateCandidate,
     clearCellCandidates,
     setCellUserValue,
     checkCell,

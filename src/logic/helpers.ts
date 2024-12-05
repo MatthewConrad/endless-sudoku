@@ -120,6 +120,7 @@ export const getGridStateWithUpdatedCell = (
   },
 });
 
+// TODO: verify behavior if cell has user value
 export const toggleCellStateCandidate = (
   candidateValue: CellValue,
   { userCandidates, ...cellState }: GridCellState
@@ -139,7 +140,7 @@ export const clearCellStateCandidates = (
 });
 
 export const setCellStateUserValue = (
-  newValue: CellValue,
+  newValue: number,
   cellState: GridCellState,
   currentGrid: PuzzleGrid
 ) => {
@@ -153,11 +154,13 @@ export const setCellStateUserValue = (
   return {
     ...cellState,
     userValue: newValue,
-    isInvalid: isValid({
-      puzzleGrid: currentGrid,
-      emptyCell: { rowIndex, columnIndex },
-      value: newValue,
-    }),
+    isInvalid: newValue
+      ? isValid({
+          puzzleGrid: currentGrid,
+          emptyCell: { rowIndex, columnIndex },
+          value: newValue,
+        })
+      : false,
   };
 };
 
