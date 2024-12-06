@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import "./App.css";
 import { createNewGrid } from "./logic/generation";
 import { PuzzleGrid } from "./types/grid";
@@ -17,7 +17,7 @@ function App() {
     gridState,
     currentGrid,
     isSolved,
-    toggleCellCandidate,
+    toggleCellUserCandidate,
     setCellUserValue,
     checkCell,
     revealCell,
@@ -29,18 +29,24 @@ function App() {
     initialGrid: initialGrid.current,
     solvedGrid: solvedGrid.current,
   });
+
   const { cursor, onToggleCandidateMode, onCellClick, onKeyDown, onKeyUp } =
     useCursor({
-      onToggleCandidate: toggleCellCandidate,
+      onToggleCandidate: toggleCellUserCandidate,
       onSetCellValue: setCellUserValue,
       onClearCell: clearCell,
     });
+
+  const [isAutoCandidate, setIsAutoCandidate] = useState(false);
 
   return (
     <>
       <div>Is solved: {`${isSolved}`}</div>
       <div>Candidate mode: {`${cursor.isCandidateMode}`}</div>
       <button onClick={onToggleCandidateMode}>Toggle candidate mode</button>
+      <button onClick={() => setIsAutoCandidate((a) => !a)}>
+        Toggle auto-candidate
+      </button>
       <button onClick={() => checkCell(cursor)}>Check current cell</button>
       <button onClick={() => revealCell(cursor)}>Reveal current cell</button>
       <button onClick={checkGrid}>Check grid</button>
@@ -76,12 +82,13 @@ function App() {
                     {...cellState}
                     onCellClick={() => onCellClick(+rowIndex, +colIndex)}
                     onCandidateClick={(candidateValue) =>
-                      toggleCellCandidate(candidateValue, cellState)
+                      toggleCellUserCandidate(candidateValue, cellState)
                     }
                     rowIndex={+rowIndex}
                     columnIndex={+colIndex}
                     isActive={isCellActive}
                     isInvalid={isCellInvalid}
+                    isAutoCandidate={isAutoCandidate}
                   />
                 );
               })}

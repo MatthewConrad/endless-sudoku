@@ -9,8 +9,9 @@ import {
   getInitialGridState,
   getPuzzleGridFromState,
   getRevealedCellState,
+  setCellStateCandidates,
   setCellStateUserValue,
-  toggleCellStateCandidate,
+  toggleCellStateUserCandidate,
   updateAllCells,
 } from "../logic/helpers";
 
@@ -30,23 +31,30 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
   const currentGrid = getPuzzleGridFromState(gridState);
   const isSolved = areGridsEqual(currentGrid, solvedGrid);
 
-  const toggleCellCandidate = (candidateValue: CellValue, cell: GridCell) =>
+  const toggleCellUserCandidate = (candidateValue: CellValue, cell: GridCell) =>
     setGridState((gs) =>
       getGridStateWithUpdatedCell(
         gs,
         cell,
-        toggleCellStateCandidate(candidateValue, getCellState(gs, cell))
+        toggleCellStateUserCandidate(candidateValue, getCellState(gs, cell))
       )
     );
 
   const setCellUserValue = (newValue: number, cell: GridCell) =>
-    setGridState((gs) =>
-      getGridStateWithUpdatedCell(
+    setGridState((gs) => {
+      const gridWithUpdatedCellValue = getGridStateWithUpdatedCell(
         gs,
         cell,
         setCellStateUserValue(newValue, getCellState(gs, cell))
-      )
-    );
+      );
+
+      return updateAllCells(gridWithUpdatedCellValue, (cellState) =>
+        setCellStateCandidates(
+          cellState,
+          getPuzzleGridFromState(gridWithUpdatedCellValue)
+        )
+      );
+    });
 
   const checkCell = (cell: GridCell) =>
     setGridState((gs) =>
@@ -57,23 +65,38 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
       )
     );
 
+  // TODO: update all auto-candidates
   const revealCell = (cell: GridCell) =>
-    setGridState((gs) =>
-      getGridStateWithUpdatedCell(
+    setGridState((gs) => {
+      const gridWithUpdatedCellValue = getGridStateWithUpdatedCell(
         gs,
         cell,
         getRevealedCellState(getCellState(gs, cell))
-      )
-    );
+      );
+      
+      return updateAllCells(gridWithUpdatedCellValue, (cellState) =>
+        setCellStateCandidates(
+          cellState,
+          getPuzzleGridFromState(gridWithUpdatedCellValue)
+        )
+      );
+    });
 
   const clearCell = (cell: GridCell) =>
-    setGridState((gs) =>
-      getGridStateWithUpdatedCell(
+    setGridState((gs) => {
+      const gridWithUpdatedCellValue = getGridStateWithUpdatedCell(
         gs,
         cell,
         clearCellState(getCellState(gs, cell))
-      )
-    );
+      );
+
+      return updateAllCells(gridWithUpdatedCellValue, (cellState) =>
+        setCellStateCandidates(
+          cellState,
+          getPuzzleGridFromState(gridWithUpdatedCellValue)
+        )
+      );
+    });
 
   const checkGrid = () =>
     setGridState((gs) => updateAllCells(gs, getCheckedCellState));
@@ -87,7 +110,7 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
     gridState,
     currentGrid,
     isSolved,
-    toggleCellCandidate,
+    toggleCellUserCandidate,
     setCellUserValue,
     checkCell,
     revealCell,

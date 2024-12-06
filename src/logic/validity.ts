@@ -1,5 +1,4 @@
 import { GridCell, PuzzleGrid } from "../types/grid";
-import { VALUES } from "./constants";
 
 interface ValidityArgs {
   puzzleGrid: PuzzleGrid;
@@ -115,16 +114,3 @@ export const isValueValid = (args: ValidityArgs) =>
   isValueValidInRow(args) &&
   isValueValidInColumn(args) &&
   isValueValidInBox(args);
-
-export const getPossibleCellValues = (
-  puzzleGrid: PuzzleGrid,
-  gridCell: GridCell
-) => {
-  return VALUES.reduce<number[]>((valid, value) => {
-    if (canPlaceValue({ puzzleGrid, gridCell, value })) {
-      return [...valid, value];
-    }
-
-    return valid;
-  }, []);
-};

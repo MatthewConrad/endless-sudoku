@@ -6,8 +6,8 @@ import {
   PuzzleGrid,
   RowState,
 } from "../types/grid";
-import { DEFAULT_CANDIDATES, MAX_INDEX } from "./constants";
-import { getPossibleCellValues } from "./validity";
+import { DEFAULT_CANDIDATES, MAX_INDEX, VALUES } from "./constants";
+import { canPlaceValue } from "./validity";
 
 /**
  * GRID GENERATION
@@ -56,24 +56,19 @@ export const areGridsEqual = (a: PuzzleGrid, b: PuzzleGrid): boolean => {
 
 export const getCellCandidates = (
   puzzleGrid: PuzzleGrid,
-  emptyCell: GridCell
+  gridCell: GridCell
 ) => {
-  const validValues = getPossibleCellValues(puzzleGrid, emptyCell);
+  return VALUES.reduce((candidates, value) => {
+    const isCandidate = canPlaceValue({ puzzleGrid, gridCell, value });
 
-  return validValues.reduce(
-    (candidates, val) => ({
-      ...candidates,
-      [val]: true,
-    }),
-    DEFAULT_CANDIDATES
-  );
+    return { ...candidates, [value]: isCandidate };
+  }, DEFAULT_CANDIDATES);
 };
 
 export const getInitialGridState = (
   initialGrid: PuzzleGrid,
   solvedGrid: PuzzleGrid
 ): GridState => {
-  console.log("calc initital state");
   return initialGrid.reduce<GridState>((gridState, row, rowIndex) => {
     const rowState = row.reduce<RowState>((rs, initialValue, columnIndex) => {
       const cellState: GridCellState = {
@@ -126,7 +121,7 @@ export const getGridStateWithUpdatedCell = (
   },
 });
 
-export const toggleCellStateCandidate = (
+export const toggleCellStateUserCandidate = (
   candidateValue: CellValue,
   { userCandidates, ...cellState }: GridCellState
 ) => ({
@@ -136,6 +131,14 @@ export const toggleCellStateCandidate = (
     ...userCandidates,
     [candidateValue]: !userCandidates[candidateValue],
   },
+});
+
+export const setCellStateCandidates = (
+  cellState: GridCellState,
+  puzzleGrid: PuzzleGrid
+): GridCellState => ({
+  ...cellState,
+  candidates: getCellCandidates(puzzleGrid, cellState),
 });
 
 export const setCellStateUserValue = (
