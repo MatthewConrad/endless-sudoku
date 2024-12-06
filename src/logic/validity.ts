@@ -3,59 +3,125 @@ import { VALUES } from "./constants";
 
 interface ValidityArgs {
   puzzleGrid: PuzzleGrid;
-  emptyCell: GridCell;
+  gridCell: GridCell;
   value: number;
 }
 
-export const isValidRow = ({
+export const canPlaceValueInRow = ({
   puzzleGrid,
-  emptyCell,
+  gridCell,
   value,
 }: ValidityArgs): boolean => {
-  return puzzleGrid[emptyCell.rowIndex].indexOf(value) === -1;
+  return puzzleGrid[gridCell.rowIndex].indexOf(value) === -1;
 };
 
-export const isValidColumn = ({
+export const isValueValidInRow = ({
   puzzleGrid,
-  emptyCell,
+  gridCell,
   value,
 }: ValidityArgs): boolean => {
-  return !puzzleGrid.some((row) => row[emptyCell.columnIndex] === value);
+  if (!value) {
+    return true;
+  }
+
+  return !puzzleGrid[gridCell.rowIndex].some(
+    (cellVal, columnIndex) =>
+      gridCell.columnIndex !== columnIndex && value === cellVal
+  );
+};
+
+export const canPlaceValueInColumn = ({
+  puzzleGrid,
+  gridCell,
+  value,
+}: ValidityArgs): boolean => {
+  return !puzzleGrid.some((row) => row[gridCell.columnIndex] === value);
+};
+
+export const isValueValidInColumn = ({
+  puzzleGrid,
+  gridCell,
+  value,
+}: ValidityArgs): boolean => {
+  if (!value) {
+    return true;
+  }
+
+  return !puzzleGrid.some(
+    (row, rowIndex) =>
+      gridCell.rowIndex !== rowIndex && value === row[gridCell.columnIndex]
+  );
 };
 
 const getBoxCoordinate = (index: number) => index - (index % 3);
 
-export const isValidBox = ({
+export const canPlaceValueInBox = ({
   puzzleGrid,
-  emptyCell,
+  gridCell,
   value,
 }: ValidityArgs): boolean => {
   const boxStart: GridCell = {
-    rowIndex: getBoxCoordinate(emptyCell.rowIndex),
-    columnIndex: getBoxCoordinate(emptyCell.columnIndex),
+    rowIndex: getBoxCoordinate(gridCell.rowIndex),
+    columnIndex: getBoxCoordinate(gridCell.columnIndex),
   };
 
   return [0, 1, 2].every((rowOffset) => {
     return ![0, 1, 2].some((colOffset) => {
-      return (
-        puzzleGrid[boxStart.rowIndex + rowOffset][
-          boxStart.columnIndex + colOffset
-        ] === value
-      );
+      const boxRowIndex = boxStart.rowIndex + rowOffset;
+      const boxColumnIndex = boxStart.columnIndex + colOffset;
+
+      const boxValue = puzzleGrid[boxRowIndex][boxColumnIndex];
+
+      return boxValue === value;
     });
   });
 };
 
-export const isValid = (args: ValidityArgs) => {
-  return isValidRow(args) && isValidColumn(args) && isValidBox(args);
+export const isValueValidInBox = ({
+  puzzleGrid,
+  gridCell,
+  value,
+}: ValidityArgs): boolean => {
+  if (!value) {
+    return true;
+  }
+  const boxStart: GridCell = {
+    rowIndex: getBoxCoordinate(gridCell.rowIndex),
+    columnIndex: getBoxCoordinate(gridCell.columnIndex),
+  };
+
+  return [0, 1, 2].every((rowOffset) => {
+    return ![0, 1, 2].some((colOffset) => {
+      const boxRowIndex = boxStart.rowIndex + rowOffset;
+      const boxColumnIndex = boxStart.columnIndex + colOffset;
+
+      const isSameCell =
+        gridCell.rowIndex === boxRowIndex &&
+        gridCell.columnIndex === boxColumnIndex;
+
+      const boxValue = puzzleGrid[boxRowIndex][boxColumnIndex];
+
+      return !isSameCell && boxValue === value;
+    });
+  });
 };
 
-export const getValidCellValues = (
+export const canPlaceValue = (args: ValidityArgs) =>
+  canPlaceValueInRow(args) &&
+  canPlaceValueInColumn(args) &&
+  canPlaceValueInBox(args);
+
+export const isValueValid = (args: ValidityArgs) =>
+  isValueValidInRow(args) &&
+  isValueValidInColumn(args) &&
+  isValueValidInBox(args);
+
+export const getPossibleCellValues = (
   puzzleGrid: PuzzleGrid,
-  emptyCell: GridCell
+  gridCell: GridCell
 ) => {
   return VALUES.reduce<number[]>((valid, value) => {
-    if (isValid({ puzzleGrid, emptyCell, value })) {
+    if (canPlaceValue({ puzzleGrid, gridCell, value })) {
       return [...valid, value];
     }
 

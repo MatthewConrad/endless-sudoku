@@ -2,7 +2,8 @@ import { VALUES } from "../logic/constants";
 import { CellValue, GridCellState } from "../types/grid";
 
 interface CellProps extends GridCellState {
-  isCellActive?: boolean;
+  isActive?: boolean;
+  isInvalid?: boolean;
   isAutoCandidate?: boolean;
   onCellClick: (rowIndex: number, columnIndex: number) => void;
   onCandidateClick: (candidateValue: CellValue) => void;
@@ -17,13 +18,14 @@ export const Cell = ({
   isConfirmed,
   isIncorrect,
   isInvalid,
-  isCellActive,
+  isActive,
   isAutoCandidate,
   onCellClick,
   onCandidateClick,
+  ...props
 }: CellProps) => {
   const classModifiers = [
-    isCellActive && "active",
+    isActive && "active",
     isConfirmed && "confirmed",
     isIncorrect && "incorrect",
     isInvalid && "invalid",
@@ -41,20 +43,20 @@ export const Cell = ({
   }, []);
 
   const handleCellClick = () => {
-    if (!isCellActive) {
+    if (!isActive) {
       onCellClick(rowIndex, columnIndex);
     }
   };
 
   const handleCandidateClick = (candidateValue: CellValue) => {
-    if (isCellActive) {
+    if (isActive) {
       onCandidateClick(candidateValue);
     }
   };
 
   return (
     <div
-      key={`${rowIndex},${columnIndex}`}
+      key={`${rowIndex},${columnIndex}-${props.value}`}
       className={`cell ${classModifiers.join(" ")}`.trim()}
       onClick={handleCellClick}
     >
@@ -67,6 +69,7 @@ export const Cell = ({
 
             return (
               <div
+                key={`${rowIndex},${columnIndex}-candidate-${v}`}
                 className={`candidate-option ${
                   isCandidate ? "placed" : ""
                 }`.trim()}

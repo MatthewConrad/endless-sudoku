@@ -5,19 +5,24 @@ import { PuzzleGrid } from "./types/grid";
 import { useCursor } from "./hooks/useCursor";
 import { Cell } from "./components/Cell";
 import { useGridState } from "./hooks/useGridState";
+import { isValueValid } from "./logic/validity";
+
+const { playableGrid, filledGrid } = createNewGrid();
 
 function App() {
-  const { playableGrid, filledGrid } = createNewGrid();
   const initialGrid = useRef<PuzzleGrid>(playableGrid);
   const solvedGrid = useRef<PuzzleGrid>(filledGrid);
 
   const {
     gridState,
+    currentGrid,
+    isSolved,
     toggleCellCandidate,
     setCellUserValue,
     checkCell,
-    checkGrid,
     revealCell,
+    clearCell,
+    checkGrid,
     revealGrid,
     resetGrid,
   } = useGridState({
@@ -28,10 +33,12 @@ function App() {
     useCursor({
       onToggleCandidate: toggleCellCandidate,
       onSetCellValue: setCellUserValue,
+      onClearCell: clearCell,
     });
 
   return (
     <>
+      <div>Is solved: {`${isSolved}`}</div>
       <div>Candidate mode: {`${cursor.isCandidateMode}`}</div>
       <button onClick={onToggleCandidateMode}>Toggle candidate mode</button>
       <button onClick={() => checkCell(cursor)}>Check current cell</button>
@@ -54,6 +61,15 @@ function App() {
 
                 const isCellActive = isCurrentRow && isCurrentColumn;
 
+                const isCellInvalid = !!(
+                  cellState.userValue &&
+                  !isValueValid({
+                    puzzleGrid: currentGrid,
+                    gridCell: cellState,
+                    value: cellState.userValue,
+                  })
+                );
+
                 return (
                   <Cell
                     key={`${rowIndex},${colIndex}`}
@@ -64,7 +80,8 @@ function App() {
                     }
                     rowIndex={+rowIndex}
                     columnIndex={+colIndex}
-                    isCellActive={isCellActive}
+                    isActive={isCellActive}
+                    isInvalid={isCellInvalid}
                   />
                 );
               })}

@@ -6,6 +6,7 @@ import { CellValue, GridCell, GridCursor } from "../types/grid";
 interface UseCursorArgs {
   onToggleCandidate: (candidateValue: CellValue, cell: GridCell) => void;
   onSetCellValue: (newValue: number, cell: GridCell) => void;
+  onClearCell: (cell: GridCell) => void;
 }
 
 const getDigitFromNativeEvent = (e: KeyboardEvent<HTMLElement>) => {
@@ -21,6 +22,7 @@ const getDigitFromNativeEvent = (e: KeyboardEvent<HTMLElement>) => {
 export const useCursor = ({
   onToggleCandidate,
   onSetCellValue,
+  onClearCell,
 }: UseCursorArgs) => {
   const [cursor, setCursor] = useState<GridCursor>({
     rowIndex: 0,
@@ -69,10 +71,7 @@ export const useCursor = ({
         e.stopPropagation();
         break;
       case "Backspace":
-        // TODO: verify behavior here
-        if (!cursor.isCandidateMode) {
-          onSetCellValue(0, cursor);
-        }
+        onClearCell(cursor);
         break;
       default:
         const keyInt = Number.parseInt(key);

@@ -7,7 +7,7 @@ import {
   RowState,
 } from "../types/grid";
 import { DEFAULT_CANDIDATES, MAX_INDEX } from "./constants";
-import { getValidCellValues, isValid } from "./validity";
+import { getPossibleCellValues } from "./validity";
 
 /**
  * GRID GENERATION
@@ -44,6 +44,12 @@ export const cloneGrid = (puzzleGrid: PuzzleGrid): PuzzleGrid => {
   return puzzleGrid.map((row) => [...row]);
 };
 
+export const areGridsEqual = (a: PuzzleGrid, b: PuzzleGrid): boolean => {
+  return !a.some((columns, rowIndex) =>
+    columns.some((cell, colIndex) => cell !== b[rowIndex][colIndex])
+  );
+};
+
 /**
  * GRID AND CELL STATE
  */
@@ -52,7 +58,7 @@ export const getCellCandidates = (
   puzzleGrid: PuzzleGrid,
   emptyCell: GridCell
 ) => {
-  const validValues = getValidCellValues(puzzleGrid, emptyCell);
+  const validValues = getPossibleCellValues(puzzleGrid, emptyCell);
 
   return validValues.reduce(
     (candidates, val) => ({
@@ -64,21 +70,21 @@ export const getCellCandidates = (
 };
 
 export const getInitialGridState = (
-  puzzleGrid: PuzzleGrid,
+  initialGrid: PuzzleGrid,
   solvedGrid: PuzzleGrid
 ): GridState => {
-  return puzzleGrid.reduce<GridState>((gridState, row, rowIndex) => {
+  console.log("calc initital state");
+  return initialGrid.reduce<GridState>((gridState, row, rowIndex) => {
     const rowState = row.reduce<RowState>((rs, initialValue, columnIndex) => {
       const cellState: GridCellState = {
         rowIndex,
         columnIndex,
         value: solvedGrid[rowIndex][columnIndex],
         userValue: initialValue,
-        candidates: getCellCandidates(puzzleGrid, { rowIndex, columnIndex }),
+        candidates: getCellCandidates(initialGrid, { rowIndex, columnIndex }),
         userCandidates: { ...DEFAULT_CANDIDATES },
         isPrefilled: initialValue !== 0,
         isConfirmed: false,
-        isInvalid: false,
         isIncorrect: false,
       };
       return {
@@ -120,32 +126,23 @@ export const getGridStateWithUpdatedCell = (
   },
 });
 
-// TODO: verify behavior if cell has user value
 export const toggleCellStateCandidate = (
   candidateValue: CellValue,
   { userCandidates, ...cellState }: GridCellState
 ) => ({
   ...cellState,
+  userValue: 0,
   userCandidates: {
     ...userCandidates,
     [candidateValue]: !userCandidates[candidateValue],
   },
 });
 
-export const clearCellStateCandidates = (
-  cellState: GridCellState
-): GridCellState => ({
-  ...cellState,
-  userCandidates: { ...DEFAULT_CANDIDATES },
-});
-
 export const setCellStateUserValue = (
   newValue: number,
-  cellState: GridCellState,
-  currentGrid: PuzzleGrid
+  cellState: GridCellState
 ) => {
-  const { isConfirmed, isPrefilled, userValue, rowIndex, columnIndex } =
-    cellState;
+  const { isConfirmed, isPrefilled, userValue } = cellState;
 
   if (isConfirmed || isPrefilled || userValue === newValue) {
     return cellState;
@@ -154,13 +151,6 @@ export const setCellStateUserValue = (
   return {
     ...cellState,
     userValue: newValue,
-    isInvalid: newValue
-      ? !isValid({
-          puzzleGrid: currentGrid,
-          emptyCell: { rowIndex, columnIndex },
-          value: newValue,
-        })
-      : false,
   };
 };
 
@@ -189,8 +179,21 @@ export const getRevealedCellState = ({
   isPrefilled,
   isConfirmed: !isPrefilled && true,
   isIncorrect: false,
-  isInvalid: false,
 });
+
+export const clearCellState = (cellState: GridCellState): GridCellState => {
+  const { isPrefilled, isConfirmed } = cellState;
+
+  if (isPrefilled || isConfirmed) {
+    return cellState;
+  }
+
+  return {
+    ...cellState,
+    userValue: 0,
+    userCandidates: { ...DEFAULT_CANDIDATES },
+  };
+};
 
 export const updateAllCells = (
   gridState: GridState,

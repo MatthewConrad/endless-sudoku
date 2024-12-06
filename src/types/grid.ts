@@ -22,7 +22,6 @@ export interface GridCellState extends PopulatedCell {
   userCandidates: CellCandidates;
   isPrefilled: boolean;
   isConfirmed: boolean;
-  isInvalid: boolean;
   isIncorrect: boolean;
 }
 
