@@ -1,6 +1,5 @@
 import { KeyboardEventHandler, KeyboardEvent, useState } from "react";
-import { ARROW_DIFFS } from "../logic/constants";
-import { addCells } from "../logic/helpers";
+import { ARROW_DIFFS, MAX_INDEX } from "../logic/constants";
 import { CellValue, GridCell, GridCursor } from "../types/grid";
 
 interface UseCursorArgs {
@@ -18,6 +17,11 @@ const getDigitFromNativeEvent = (e: KeyboardEvent<HTMLElement>) => {
 
   return intDigit;
 };
+
+const addCells = (a: GridCell, b: GridCell): GridCell => ({
+  rowIndex: Math.min(Math.max(0, a.rowIndex + b.rowIndex), MAX_INDEX),
+  columnIndex: Math.min(Math.max(0, a.columnIndex + b.columnIndex), MAX_INDEX),
+});
 
 export const useCursor = ({
   onToggleCandidate,

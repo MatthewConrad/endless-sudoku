@@ -1,7 +1,7 @@
 import { GridCell, PopulatedCell, PuzzleGrid } from "../types/grid";
 import { BLANK_GRID, FILL_LIMIT, VALUES } from "./constants";
 import { cloneGrid, getRandomCell, shuffle } from "./helpers";
-import { canPlaceValue } from "./validity";
+import { isCellValueValid } from "./validity";
 
 export const getBlankGrid = () => cloneGrid(BLANK_GRID);
 
@@ -37,7 +37,7 @@ export const fillGrid = (puzzleGrid: PuzzleGrid): PuzzleGrid | undefined => {
     }
 
     if (
-      canPlaceValue({ puzzleGrid: initialGrid, gridCell: emptyCell, value })
+      isCellValueValid({ puzzleGrid: initialGrid, gridCell: emptyCell, value })
     ) {
       initialGrid[rowIndex][columnIndex] = value;
 

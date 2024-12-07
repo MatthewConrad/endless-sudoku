@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { CellValue, GridCell, GridState, PuzzleGrid } from "../types/grid";
 import {
-  areGridsEqual,
   clearCellState,
   getCellState,
   getCheckedCellState,
@@ -13,7 +12,9 @@ import {
   setCellStateUserValue,
   toggleCellStateUserCandidate,
   updateAllCells,
-} from "../logic/helpers";
+  updateRelatedCells,
+} from "../logic/state";
+import { areGridsEqual } from "../logic/helpers";
 
 interface UseGridStateArgs {
   initialGrid: PuzzleGrid;
@@ -48,7 +49,7 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
         setCellStateUserValue(newValue, getCellState(gs, cell))
       );
 
-      return updateAllCells(gridWithUpdatedCellValue, (cellState) =>
+      return updateRelatedCells(cell, gridWithUpdatedCellValue, (cellState) =>
         setCellStateCandidates(
           cellState,
           getPuzzleGridFromState(gridWithUpdatedCellValue)
@@ -65,7 +66,6 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
       )
     );
 
-  // TODO: update all auto-candidates
   const revealCell = (cell: GridCell) =>
     setGridState((gs) => {
       const gridWithUpdatedCellValue = getGridStateWithUpdatedCell(
@@ -73,8 +73,8 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
         cell,
         getRevealedCellState(getCellState(gs, cell))
       );
-      
-      return updateAllCells(gridWithUpdatedCellValue, (cellState) =>
+
+      return updateRelatedCells(cell, gridWithUpdatedCellValue, (cellState) =>
         setCellStateCandidates(
           cellState,
           getPuzzleGridFromState(gridWithUpdatedCellValue)
@@ -90,7 +90,7 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
         clearCellState(getCellState(gs, cell))
       );
 
-      return updateAllCells(gridWithUpdatedCellValue, (cellState) =>
+      return updateRelatedCells(cell, gridWithUpdatedCellValue, (cellState) =>
         setCellStateCandidates(
           cellState,
           getPuzzleGridFromState(gridWithUpdatedCellValue)

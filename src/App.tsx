@@ -5,7 +5,7 @@ import { PuzzleGrid } from "./types/grid";
 import { useCursor } from "./hooks/useCursor";
 import { Cell } from "./components/Cell";
 import { useGridState } from "./hooks/useGridState";
-import { isValueValid } from "./logic/validity";
+import { isCellValueValid } from "./logic/validity";
 
 const { playableGrid, filledGrid } = createNewGrid();
 
@@ -69,7 +69,7 @@ function App() {
 
                 const isCellInvalid = !!(
                   cellState.userValue &&
-                  !isValueValid({
+                  !isCellValueValid({
                     puzzleGrid: currentGrid,
                     gridCell: cellState,
                     value: cellState.userValue,
