@@ -15,6 +15,7 @@ export const Cell = ({
   userCandidates,
   rowIndex,
   columnIndex,
+  isPrefilled,
   isConfirmed,
   isIncorrect,
   isInvalid,
@@ -22,9 +23,9 @@ export const Cell = ({
   isAutoCandidate,
   onCellClick,
   onCandidateClick,
-  ...props
 }: CellProps) => {
   const classModifiers = [
+    isPrefilled && "prefilled",
     isActive && "active",
     isConfirmed && "confirmed",
     isIncorrect && "incorrect",
@@ -56,9 +57,11 @@ export const Cell = ({
 
   return (
     <div
-      key={`${rowIndex},${columnIndex}-${props.value}`}
+      key={`${rowIndex},${columnIndex}`}
       className={`cell ${classModifiers.join(" ")}`.trim()}
       onClick={handleCellClick}
+      aria-disabled={isPrefilled || undefined}
+      aria-invalid={isInvalid || undefined}
     >
       {userValue ? (
         <div>{userValue}</div>

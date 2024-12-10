@@ -5,6 +5,7 @@ import { isCellValueValid } from "../logic/validity";
 import { useCursor } from "../hooks/useCursor";
 import { useGridState } from "../hooks/useGridState";
 import { Cell } from "../components/Cell";
+import { GameControls } from "./GameControls";
 
 interface GameGridProps {
   initialGrid: PuzzleGrid;
@@ -45,18 +46,14 @@ export const GameGrid = ({
 
   return (
     <>
-      <div>Is solved: {`${isSolved}`}</div>
-      <div>Candidate mode: {`${cursor.isCandidateMode}`}</div>
-      <button onClick={onToggleCandidateMode}>Toggle candidate mode</button>
-      <button onClick={() => setIsAutoCandidate((a) => !a)}>
-        Toggle auto-candidate
-      </button>
-      <button onClick={() => checkCell(cursor)}>Check current cell</button>
-      <button onClick={() => revealCell(cursor)}>Reveal current cell</button>
-      <button onClick={checkGrid}>Check grid</button>
-      <button onClick={revealGrid}>Reveal grid</button>
-      <button onClick={resetGrid}>Reset grid</button>
-      <button onClick={() => onStartNewGrid(isSolved)}>Start new</button>
+      <div>
+        <button onClick={() => checkCell(cursor)}>Check current cell</button>
+        <button onClick={() => revealCell(cursor)}>Reveal current cell</button>
+        <button onClick={checkGrid}>Check grid</button>
+        <button onClick={revealGrid}>Reveal grid</button>
+        <button onClick={resetGrid}>Reset grid</button>
+        <button onClick={() => onStartNewGrid(isSolved)}>Start new</button>
+      </div>
       <div
         className="grid"
         tabIndex={0}
@@ -101,6 +98,19 @@ export const GameGrid = ({
           );
         })}
       </div>
+      <GameControls
+        isCandidateMode={cursor.isCandidateMode}
+        onToggleCandidateMode={onToggleCandidateMode}
+        isAutoCondidate={isAutoCandidate}
+        onToggleAutoCandidate={() => setIsAutoCandidate((a) => !a)}
+        onClickValue={(v) => {
+          if (cursor.isCandidateMode) {
+            toggleCellUserCandidate(v, cursor);
+          } else {
+            setCellUserValue(v, cursor);
+          }
+        }}
+      />
     </>
   );
 };
