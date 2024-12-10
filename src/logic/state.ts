@@ -156,6 +156,7 @@ export const clearCellState = (cellState: GridCellState): GridCellState => {
     ...cellState,
     userValue: 0,
     userCandidates: { ...DEFAULT_CANDIDATES },
+    isIncorrect: false,
   };
 };
 

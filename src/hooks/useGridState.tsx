@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CellValue, GridCell, GridState, PuzzleGrid } from "../types/grid";
 import {
   clearCellState,
@@ -105,6 +105,10 @@ export const useGridState = ({ initialGrid, solvedGrid }: UseGridStateArgs) => {
     setGridState((gs) => updateAllCells(gs, getRevealedCellState));
 
   const resetGrid = () => setGridState(initialState);
+
+  useEffect(() => {
+    setGridState(initialState);
+  }, [initialGrid, solvedGrid]);
 
   return {
     gridState,

@@ -1,103 +1,32 @@
-import { useRef, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import "./App.css";
 import { createNewGrid } from "./logic/generation";
 import { PuzzleGrid } from "./types/grid";
-import { useCursor } from "./hooks/useCursor";
-import { Cell } from "./components/Cell";
-import { useGridState } from "./hooks/useGridState";
-import { isCellValueValid } from "./logic/validity";
+import { GameGrid } from "./components/GameGrid";
+import { BLANK_GRID } from "./logic/constants";
 
-const { playableGrid, filledGrid } = createNewGrid();
+const App = () => {
+  const [baseGrids, setBaseGrids] = useState<{
+    initialGrid: PuzzleGrid;
+    solvedGrid: PuzzleGrid;
+  }>({ initialGrid: [...BLANK_GRID], solvedGrid: [...BLANK_GRID] });
 
-function App() {
-  const initialGrid = useRef<PuzzleGrid>(playableGrid);
-  const solvedGrid = useRef<PuzzleGrid>(filledGrid);
+  const handleStartNewGrid = (isSolved: boolean) => {
+    if (isSolved || confirm("Are you sure you want to start a new grid?")) {
+      const newGrid = createNewGrid();
+      setBaseGrids({
+        initialGrid: newGrid.playableGrid,
+        solvedGrid: newGrid.filledGrid,
+      });
+    }
+  };
 
-  const {
-    gridState,
-    currentGrid,
-    isSolved,
-    toggleCellUserCandidate,
-    setCellUserValue,
-    checkCell,
-    revealCell,
-    clearCell,
-    checkGrid,
-    revealGrid,
-    resetGrid,
-  } = useGridState({
-    initialGrid: initialGrid.current,
-    solvedGrid: solvedGrid.current,
-  });
+  useLayoutEffect(() => {
+    const { playableGrid, filledGrid } = createNewGrid();
+    setBaseGrids({ initialGrid: playableGrid, solvedGrid: filledGrid });
+  }, []);
 
-  const { cursor, onToggleCandidateMode, onCellClick, onKeyDown, onKeyUp } =
-    useCursor({
-      onToggleCandidate: toggleCellUserCandidate,
-      onSetCellValue: setCellUserValue,
-      onClearCell: clearCell,
-    });
-
-  const [isAutoCandidate, setIsAutoCandidate] = useState(false);
-
-  return (
-    <>
-      <div>Is solved: {`${isSolved}`}</div>
-      <div>Candidate mode: {`${cursor.isCandidateMode}`}</div>
-      <button onClick={onToggleCandidateMode}>Toggle candidate mode</button>
-      <button onClick={() => setIsAutoCandidate((a) => !a)}>
-        Toggle auto-candidate
-      </button>
-      <button onClick={() => checkCell(cursor)}>Check current cell</button>
-      <button onClick={() => revealCell(cursor)}>Reveal current cell</button>
-      <button onClick={checkGrid}>Check grid</button>
-      <button onClick={revealGrid}>Reveal grid</button>
-      <button onClick={resetGrid}>Reset grid</button>
-      <div
-        className="grid"
-        tabIndex={0}
-        onKeyDown={onKeyDown}
-        onKeyUp={onKeyUp}
-      >
-        {Object.entries(gridState).map(([rowIndex, rowState]) => {
-          return (
-            <div key={`row-${rowIndex}`} className="row">
-              {Object.entries(rowState).map(([colIndex, cellState]) => {
-                const isCurrentRow = cursor.rowIndex === +rowIndex;
-                const isCurrentColumn = cursor.columnIndex === +colIndex;
-
-                const isCellActive = isCurrentRow && isCurrentColumn;
-
-                const isCellInvalid = !!(
-                  cellState.userValue &&
-                  !isCellValueValid({
-                    puzzleGrid: currentGrid,
-                    gridCell: cellState,
-                    value: cellState.userValue,
-                  })
-                );
-
-                return (
-                  <Cell
-                    key={`${rowIndex},${colIndex}`}
-                    {...cellState}
-                    onCellClick={() => onCellClick(+rowIndex, +colIndex)}
-                    onCandidateClick={(candidateValue) =>
-                      toggleCellUserCandidate(candidateValue, cellState)
-                    }
-                    rowIndex={+rowIndex}
-                    columnIndex={+colIndex}
-                    isActive={isCellActive}
-                    isInvalid={isCellInvalid}
-                    isAutoCandidate={isAutoCandidate}
-                  />
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-    </>
-  );
-}
+  return <GameGrid {...baseGrids} onStartNewGrid={handleStartNewGrid} />;
+};
 
 export default App;
