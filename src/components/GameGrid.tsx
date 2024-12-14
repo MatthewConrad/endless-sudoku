@@ -6,6 +6,7 @@ import { useCursor } from "../hooks/useCursor";
 import { useGridState } from "../hooks/useGridState";
 import { Cell } from "../components/Cell";
 import { GameControls } from "./GameControls";
+import { getHint } from "../logic/hints";
 
 interface GameGridProps {
   initialGrid: PuzzleGrid;
@@ -45,7 +46,7 @@ export const GameGrid = ({
   const [isAutoCandidate, setIsAutoCandidate] = useState(false);
 
   return (
-    <>
+    <div onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
       <div>
         <button onClick={() => checkCell(cursor)}>Check current cell</button>
         <button onClick={() => revealCell(cursor)}>Reveal current cell</button>
@@ -53,13 +54,18 @@ export const GameGrid = ({
         <button onClick={revealGrid}>Reveal grid</button>
         <button onClick={resetGrid}>Reset grid</button>
         <button onClick={() => onStartNewGrid(isSolved)}>Start new</button>
+        <button
+          onClick={() => {
+            const hintCell = getHint(gridState);
+            if (hintCell) {
+              onCellClick(hintCell.rowIndex, hintCell.columnIndex);
+            }
+          }}
+        >
+          Hint
+        </button>
       </div>
-      <div
-        className="grid"
-        tabIndex={0}
-        onKeyDown={onKeyDown}
-        onKeyUp={onKeyUp}
-      >
+      <div className="grid">
         {Object.entries(gridState).map(([rowIndex, rowState]) => {
           return (
             <div key={`row-${rowIndex}`} className="row">
@@ -111,6 +117,6 @@ export const GameGrid = ({
           }
         }}
       />
-    </>
+    </div>
   );
 };

@@ -1,4 +1,4 @@
-import { GridCell, PuzzleGrid } from "../types/grid";
+import { GridCell, GridCellState, GridState, PuzzleGrid } from "../types/grid";
 
 /**
  * GRID GENERATION
@@ -26,6 +26,61 @@ export const getRandomCell = (): GridCell => ({
   columnIndex: getRandomIndex(),
 });
 
+export const filterByEmptyGridCell = (
+  cellState: GridCellState,
+  predicate: (cellState: GridCellState) => boolean
+): boolean => {
+  if (cellState.isPrefilled || cellState.isConfirmed || cellState.userValue) {
+    return false;
+  }
+
+  return predicate(cellState);
+};
+
+export const findEmptyGridCell = (
+  gridState: GridState,
+  predicate: (cellState: GridCellState) => boolean
+): GridCell | undefined => {
+  const foundCell: GridCell = { rowIndex: -1, columnIndex: -1 };
+
+  foundCell.rowIndex = Object.values(gridState).findIndex((row) => {
+    const columnIndex = Object.values(row).findIndex((cellState) =>
+      filterByEmptyGridCell(cellState, predicate)
+    );
+
+    foundCell.columnIndex = columnIndex;
+    return columnIndex > -1;
+  });
+
+  if (foundCell.rowIndex > -1 && foundCell.columnIndex > -1) {
+    return foundCell;
+  }
+
+  return;
+};
+
+export const filterEmptyGridCells = (
+  gridState: GridState,
+  predicate: (cellState: GridCellState) => boolean
+): GridCellState[] => {
+  return Object.values(gridState).reduce<GridCellState[]>(
+    (matchedCells, row) => {
+      const columnMatches = Object.values(row).reduce<GridCellState[]>(
+        (colMatchedCells, cellState) => {
+          if (filterByEmptyGridCell(cellState, predicate)) {
+            return [...colMatchedCells, cellState];
+          }
+
+          return colMatchedCells;
+        },
+        []
+      );
+      return [...matchedCells, ...columnMatches];
+    },
+    []
+  );
+};
+
 export const cloneGrid = (puzzleGrid: PuzzleGrid): PuzzleGrid => {
   return puzzleGrid.map((row) => [...row]);
 };
@@ -42,33 +97,40 @@ const getBoxStartCell = ({ rowIndex, columnIndex }: GridCell): GridCell => ({
   columnIndex: getBoxStartIndex(columnIndex),
 });
 
-export const getRelatedCells = ({
-  rowIndex,
-  columnIndex,
-}: GridCell): GridCell[] => {
-  const crossCells = Array(9)
+export const getRelatedCrossCells = (
+  { rowIndex, columnIndex }: GridCell,
+  direction?: "row" | "column"
+): GridCell[] => {
+  return Array(9)
     .fill(null)
     .reduce<GridCell[]>((crosses, _, index) => {
       const related = [];
-      if (index !== columnIndex) {
+      if (index !== columnIndex && direction !== "column") {
         related.push({ rowIndex, columnIndex: index });
       }
 
-      if (index !== rowIndex) {
+      if (index !== rowIndex && direction !== "row") {
         related.push({ rowIndex: index, columnIndex });
       }
 
       return [...crosses, ...related];
     }, []);
+};
 
+export const getRelatedBoxCells = (
+  { rowIndex, columnIndex }: GridCell,
+  includeCrosses?: boolean
+): GridCell[] => {
   const boxStartCell = getBoxStartCell({ rowIndex, columnIndex });
-  const boxCells = [0, 1, 2].reduce<GridCell[]>((box, rowOffset) => {
+  return [0, 1, 2].reduce<GridCell[]>((box, rowOffset) => {
     const rowCells = [0, 1, 2].reduce<GridCell[]>((row, colOffset) => {
       const boxRowIndex = boxStartCell.rowIndex + rowOffset;
       const boxColumnIndex = boxStartCell.columnIndex + colOffset;
 
-      // already accounted for by crosses
-      if (boxRowIndex === rowIndex || boxColumnIndex === columnIndex) {
+      if (
+        !includeCrosses &&
+        (boxRowIndex === rowIndex || boxColumnIndex === columnIndex)
+      ) {
         return [...row];
       }
 
@@ -82,6 +144,17 @@ export const getRelatedCells = ({
     }, []);
     return [...box, ...rowCells];
   }, []);
+};
+
+export const getRelatedCells = ({
+  rowIndex,
+  columnIndex,
+}: GridCell): GridCell[] => {
+  const crossCells = getRelatedCrossCells({ rowIndex, columnIndex });
+  const boxCells = getRelatedBoxCells({ rowIndex, columnIndex });
 
   return [...crossCells, ...boxCells];
 };
+
+export const getCandidateCount = ({ candidates }: GridCellState) =>
+  Object.values(candidates).filter(Boolean).length;
