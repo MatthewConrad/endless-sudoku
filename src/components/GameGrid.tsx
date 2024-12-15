@@ -65,7 +65,7 @@ export const GameGrid = ({
           Hint
         </button>
       </div>
-      <div className="grid">
+      <div className="grid" tabIndex={0}>
         {Object.entries(gridState).map(([rowIndex, rowState]) => {
           return (
             <div key={`row-${rowIndex}`} className="row">

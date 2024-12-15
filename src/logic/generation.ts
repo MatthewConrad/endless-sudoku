@@ -1,6 +1,6 @@
 import { GridCell, PopulatedCell, PuzzleGrid } from "../types/grid";
 import { BLANK_GRID, FILL_LIMIT, VALUES } from "./constants";
-import { cloneGrid, getRandomCell, shuffle } from "./helpers";
+import { areGridsEqual, cloneGrid, getRandomCell, shuffle } from "./helpers";
 import { isCellValueValid } from "./validity";
 
 export const getBlankGrid = () => cloneGrid(BLANK_GRID);
@@ -69,7 +69,12 @@ export const makeGridPlayable = (
 
       playableGrid[rowIndex][columnIndex] = 0;
 
-      if (!fillGrid(playableGrid)) {
+      const [possible1, possible2] = [
+        fillGrid(playableGrid),
+        fillGrid(playableGrid),
+      ];
+
+      if (!possible1 || !possible2 || !areGridsEqual(possible1, possible2)) {
         removedCells.pop();
         playableGrid[rowIndex][columnIndex] = value;
       }
