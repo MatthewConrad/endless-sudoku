@@ -1,4 +1,5 @@
 import { GridCell, GridCellState, GridState, PuzzleGrid } from "../types/grid";
+import { BLANK_GRID } from "./constants";
 
 /**
  * GRID GENERATION
@@ -158,3 +159,22 @@ export const getRelatedCells = ({
 
 export const getCandidateCount = ({ candidates }: GridCellState) =>
   Object.values(candidates).filter(Boolean).length;
+
+export const getSeedGrid = (lastGrid: PuzzleGrid, side: "top" | "bottom") => {
+  const initialGrid = cloneGrid(BLANK_GRID);
+
+  const sourceRowIndexes = side === "top" ? [0, 1, 2] : [6, 7, 8];
+
+  sourceRowIndexes.forEach((sourceRowIndex) => {
+    [6, 7, 8].forEach((sourceColumnIndex) => {
+      const rowDiff = side === "top" ? -6 : 6;
+      const rowIndex = sourceRowIndex - rowDiff;
+      const columnIndex = sourceColumnIndex - 6;
+
+      initialGrid[rowIndex][columnIndex] =
+        lastGrid[sourceRowIndex][sourceColumnIndex];
+    });
+  });
+
+  return initialGrid;
+};
