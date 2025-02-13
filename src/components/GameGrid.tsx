@@ -46,7 +46,7 @@ export const GameGrid = ({
   const [isAutoCandidate, setIsAutoCandidate] = useState(false);
 
   return (
-    <div onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
+    <div className="container" onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
       <div>
         <button onClick={() => checkCell(cursor)}>Check current cell</button>
         <button onClick={() => revealCell(cursor)}>Reveal current cell</button>

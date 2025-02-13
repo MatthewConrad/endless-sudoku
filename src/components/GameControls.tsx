@@ -27,7 +27,9 @@ export const GameControls = ({
         />
         <label htmlFor="candidate-mode-toggle">Notes entry</label>
       </div>
-      <div className="keypad-grid">
+      <div
+        className={`keypad-grid ${!isCandidateMode ? "expanded" : ""}`.trim()}
+      >
         {VALUES.map((v) => (
           <div
             key={`controls-val-${v}`}
