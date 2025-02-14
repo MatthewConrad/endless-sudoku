@@ -110,6 +110,7 @@ export const setCellStateUserValue = (
   return {
     ...cellState,
     userValue: newValue,
+    isIncorrect: false,
   };
 };
 
