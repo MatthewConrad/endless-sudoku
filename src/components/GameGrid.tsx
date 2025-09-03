@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { PuzzleGrid } from "../types/grid";
 import { isCellValueValid } from "../logic/validity";
@@ -45,8 +45,18 @@ export const GameGrid = ({
 
   const [isAutoCandidate, setIsAutoCandidate] = useState(false);
 
+  useEffect(() => {
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyUp);
+    };
+  });
+
   return (
-    <div className="container" onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
+    <div className="container">
       <div>
         {!isSolved && (
           <>
@@ -75,7 +85,7 @@ export const GameGrid = ({
           </button>
         )}
       </div>
-      <div className="grid" tabIndex={0}>
+      <div className="grid">
         {Object.entries(gridState).map(([rowIndex, rowState]) => {
           return (
             <div key={`row-${rowIndex}`} className="row">

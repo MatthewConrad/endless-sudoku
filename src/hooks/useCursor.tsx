@@ -1,4 +1,4 @@
-import { KeyboardEventHandler, KeyboardEvent, useState } from "react";
+import { useState } from "react";
 import { ARROW_DIFFS, MAX_INDEX } from "../logic/constants";
 import { CellValue, GridCell, GridCursor } from "../types/grid";
 
@@ -8,10 +8,8 @@ interface UseCursorArgs {
   onClearCell: (cell: GridCell) => void;
 }
 
-const getDigitFromNativeEvent = (e: KeyboardEvent<HTMLElement>) => {
-  const {
-    nativeEvent: { code },
-  } = e;
+const getDigitFromEvent = (e: KeyboardEvent) => {
+  const { code } = e;
 
   const [_, intDigit] = code.toLowerCase().split("digit");
 
@@ -40,9 +38,10 @@ export const useCursor = ({
   const onCellClick = (rowIndex: number, columnIndex: number) =>
     setCursor((prev) => ({ ...prev, rowIndex, columnIndex }));
 
-  const onKeyDown: KeyboardEventHandler<HTMLElement> = (e) => {
+  const onKeyDown = (e: KeyboardEvent) => {
+    console.log("on keydown");
     const rawKey = e.key;
-    const shiftedKey = getDigitFromNativeEvent(e);
+    const shiftedKey = getDigitFromEvent(e);
 
     const key = e.shiftKey && shiftedKey ? shiftedKey : rawKey;
 
@@ -70,10 +69,6 @@ export const useCursor = ({
           isCandidateMode: !prev.isCandidateMode,
         }));
         break;
-      case "Tab":
-        e.preventDefault();
-        e.stopPropagation();
-        break;
       case "Backspace":
         onClearCell(cursor);
         break;
@@ -92,7 +87,7 @@ export const useCursor = ({
     }
   };
 
-  const onKeyUp: KeyboardEventHandler<HTMLElement> = (e) => {
+  const onKeyUp = (e: KeyboardEvent) => {
     switch (e.key) {
       case "Shift":
         e.preventDefault();
