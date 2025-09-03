@@ -48,22 +48,32 @@ export const GameGrid = ({
   return (
     <div className="container" onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
       <div>
-        <button onClick={() => checkCell(cursor)}>Check current cell</button>
-        <button onClick={() => revealCell(cursor)}>Reveal current cell</button>
-        <button onClick={checkGrid}>Check grid</button>
-        <button onClick={revealGrid}>Reveal grid</button>
+        {!isSolved && (
+          <>
+            <button onClick={() => checkCell(cursor)}>
+              Check current cell
+            </button>
+            <button onClick={() => revealCell(cursor)}>
+              Reveal current cell
+            </button>
+            <button onClick={checkGrid}>Check grid</button>
+            <button onClick={revealGrid}>Reveal grid</button>
+          </>
+        )}
         <button onClick={resetGrid}>Reset grid</button>
         <button onClick={() => onStartNewGrid(isSolved)}>Start new</button>
-        <button
-          onClick={() => {
-            const hintCell = getHint(gridState);
-            if (hintCell) {
-              onCellClick(hintCell.rowIndex, hintCell.columnIndex);
-            }
-          }}
-        >
-          Hint
-        </button>
+        {!isSolved && (
+          <button
+            onClick={() => {
+              const hintCell = getHint(gridState);
+              if (hintCell) {
+                onCellClick(hintCell.rowIndex, hintCell.columnIndex);
+              }
+            }}
+          >
+            Hint
+          </button>
+        )}
       </div>
       <div className="grid" tabIndex={0}>
         {Object.entries(gridState).map(([rowIndex, rowState]) => {
